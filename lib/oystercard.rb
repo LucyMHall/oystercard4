@@ -1,6 +1,6 @@
 class Oystercard
 
-    attr_accessor :balance
+    attr_reader :balance
     # attr_accessor :state
 
     MAXIMUM_BALANCE = 90
