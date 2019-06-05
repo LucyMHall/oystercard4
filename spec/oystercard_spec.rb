@@ -4,6 +4,7 @@ describe Oystercard do
 
   before(:each) do
     subject.top_up(Oystercard::MINIMUM_BALANCE)
+    @station = "Euston"
   end
 
   describe '#initialize' do
@@ -34,16 +35,21 @@ describe Oystercard do
 
     it 'requires a minimum balance' do
       oystercard = Oystercard.new
-      expect { oystercard.touch_in}.to raise_error 'minimum balance required'
+      expect { oystercard.touch_in(@station)}.to raise_error 'minimum balance required'
     end
 
-    it "card touch in, card status changed to in use" do
-        expect(subject.touch_in).to eq true
+    it 'records an entry station' do
+        subject.touch_in(@station)
+        expect(subject.entry_station).to eq(@station)
     end
-
   end
 
   describe '#touch_out' do
+    it 'resets entry station to nil' do
+      subject.touch_in(@station)
+      subject.touch_out
+      expect(subject.entry_station).to eq nil
+    end
 
     #it { is_expected.to respond_to(:deduct).with(1).argument } ....now we cannot access it because the method became private
 
@@ -53,7 +59,7 @@ describe Oystercard do
     # end
 
     it 'card touch out, fare deducted' do
-      subject.touch_in
+      subject.touch_in(@station)
       expect{subject.touch_out}.to change {subject.balance}.by(-Oystercard::FARE)
     end
 
@@ -62,7 +68,7 @@ describe Oystercard do
   describe "#in_journey" do
 
     it "card touches in and we are in journey" do
-        subject.touch_in
+        subject.touch_in(@station)
         expect(subject.in_journey?).to be true
     end
 
