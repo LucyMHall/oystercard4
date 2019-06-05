@@ -2,11 +2,15 @@ require 'oystercard'
 
 describe Oystercard do
 
+  before(:each) do
+    subject.top_up(Oystercard::MINIMUM_BALANCE)
+  end
 
   describe '#initialize' do
 
     it "card has a balance" do
-      expect(subject.balance).to eq(0)
+      oystercard = Oystercard.new
+      expect(oystercard.balance).to eq(0)
     end
 
   end
@@ -20,9 +24,10 @@ describe Oystercard do
     end
 
     it "to raise an error if the maximum balance is exceeded" do
+        oystercard = Oystercard.new
         maximum_balance = Oystercard::MAXIMUM_BALANCE
-        subject.top_up(maximum_balance)
-        expect{ subject.top_up 1 }.to raise_error 'maximum balance #{MAXIMUM_BALANCE} exceeded'
+        oystercard.top_up(maximum_balance)
+        expect{ oystercard.top_up 1 }.to raise_error 'maximum balance #{MAXIMUM_BALANCE} exceeded'
     end
 
   describe '#touch_in' do
@@ -33,7 +38,6 @@ describe Oystercard do
     end
 
     it "card touch in, card status changed to in use" do
-        subject.top_up(Oystercard::MINIMUM_BALANCE)
         expect(subject.touch_in).to eq true
     end
 
@@ -41,10 +45,16 @@ describe Oystercard do
 
   describe '#touch_out' do
 
-    it { is_expected.to respond_to(:deduct).with(1).argument }
+    #it { is_expected.to respond_to(:deduct).with(1).argument } ....now we cannot access it because the method became private
 
-    it "card touch out, card status not in use" do
-        expect(subject.touch_out).to eq false
+    # it "card touch out, card status not in use" do
+      # subject.touch_out
+      # expect(subject.state).to eq false
+    # end
+
+    it 'card touch out, fare deducted' do
+      subject.touch_in
+      expect{subject.touch_out}.to change {subject.balance}.by(-Oystercard::FARE)
     end
 
   end
@@ -52,7 +62,6 @@ describe Oystercard do
   describe "#in_journey" do
 
     it "card touches in and we are in journey" do
-        subject.top_up(Oystercard::MINIMUM_BALANCE)
         subject.touch_in
         expect(subject.in_journey?).to be true
     end
