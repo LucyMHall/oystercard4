@@ -6,18 +6,10 @@ describe Oystercard do
     subject.top_up(Oystercard::MINIMUM_BALANCE)
     @entry_station = double("station")
     @exit_station = double("station")
+    @journey = double("journey", entry_station: @entry_station, exit_station: @exit_station)
   end
 
   describe '#initialize' do
-
-    it "card has a balance" do
-      oystercard = Oystercard.new
-      expect(oystercard.balance).to eq(0)
-    end
-
-    it "has a empty list of journeys by default" do
-      expect(subject.list_of_journeys).to eq([])
-    end
 
   end
 
@@ -36,16 +28,11 @@ describe Oystercard do
   end
 
   describe '#touch_in' do
-
     it 'requires a minimum balance' do
       oystercard = Oystercard.new
       expect { oystercard.touch_in(@entry_station)}.to raise_error 'minimum balance required'
     end
 
-    it 'records an entry station' do
-      subject.touch_in(@entry_station)
-      expect(subject.entry_station).to eq(@entry_station)
-    end
   end
 
   describe '#touch_out' do
@@ -55,16 +42,16 @@ describe Oystercard do
       expect(subject.entry_station).to eq nil
     end
 
-    it 'it deducts the minimum fare' do
+    it 'deducts the minimum fare' do
       subject.touch_in(@entry_station)
+      subject.touch_out(@exit_station)
       expect{subject.touch_out(@exit_station)}.to change {subject.balance}.by(-Oystercard::MINIMUM_BALANCE)
     end
 
-    it "records an exit station" do
-      subject.touch_out(@exit_station)
-      expect(subject.exit_station).to eq(@exit_station)
+    it 'deducts 6 if the journey is incomplete' do
+      subject.touch_in(@entry_station)
+      expect{subject.touch_out(@exit_station)}.to change {subject.balance}.by(-Oystercard::PENALTY_FARE)
     end
-
   end
 
   describe "#in_journey" do
@@ -74,27 +61,17 @@ describe Oystercard do
         expect(subject.in_journey?).to be true
     end
 
-    it "card touches out and we are in journey" do
-        subject.touch_out(@exit_station)
-        expect(subject.in_journey?).to be false
-    end
-
   end
 
-  describe '#journey_log' do
+  describe "#view_past_journeys" do
 
-    it 'tells you your previous journeys' do
+    it "returns your previoUs journeys" do
       subject.touch_in(@entry_station)
       subject.touch_out(@exit_station)
-      expect{subject.journey_log}.to output("#{@entry_station} to #{@exit_station}").to_stdout
-    end
-
-    it "touching in and out creates one journey" do
-      subject.touch_in(@entry_station)
-      subject.touch_out(@exit_station)
-      expect(subject.journey_log.length).to eq(1)
+      expect{subject.view_past_journeys}.to output("#{@entry_station} to #{@exit_station}").to_stdout
     end
   end
+
 
 
 end
