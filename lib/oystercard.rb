@@ -20,6 +20,7 @@ class Oystercard
     def touch_in(entry_station, journey= Journey.new)
       raise 'minimum balance required' if @balance < MINIMUM_BALANCE
       @journey = journey
+      @journey.reset_current_journey
       @journey.start_journey(entry_station)
     end
 

@@ -36,11 +36,6 @@ describe Oystercard do
   end
 
   describe '#touch_out' do
-    it 'resets entry station to nil' do
-      subject.touch_in(@entry_station)
-      subject.touch_out(@exit_station)
-      expect(subject.entry_station).to eq nil
-    end
 
     it 'deducts the minimum fare' do
       subject.touch_in(@entry_station)
@@ -48,7 +43,7 @@ describe Oystercard do
       expect{subject.touch_out(@exit_station)}.to change {subject.balance}.by(-Oystercard::MINIMUM_BALANCE)
     end
 
-    it 'deducts 6 if the journey is incomplete' do
+    it 'deducts #{Oystercard::PENALTY_FARE} if the journey is incomplete' do
       subject.touch_in(@entry_station)
       expect{subject.touch_out(@exit_station)}.to change {subject.balance}.by(-Oystercard::PENALTY_FARE)
     end
@@ -65,7 +60,7 @@ describe Oystercard do
 
   describe "#view_past_journeys" do
 
-    it "returns your previoUs journeys" do
+    it "returns your previous journeys" do
       subject.touch_in(@entry_station)
       subject.touch_out(@exit_station)
       expect{subject.view_past_journeys}.to output("#{@entry_station} to #{@exit_station}").to_stdout
