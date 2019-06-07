@@ -65,6 +65,8 @@ describe Oystercard do
       subject.touch_out(@exit_station)
       expect{subject.view_past_journeys}.to output("#{@entry_station} to #{@exit_station}").to_stdout
     end
+
+    it "allows you to see more than one journey an oystercard has been on"
   end
 
 

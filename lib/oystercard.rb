@@ -20,13 +20,13 @@ class Oystercard
     def touch_in(entry_station, journey= Journey.new)
       raise 'minimum balance required' if @balance < MINIMUM_BALANCE
       @journey = journey
-      @journey.reset_current_journey
       @journey.start_journey(entry_station)
     end
 
     def touch_out(exit_station)
-      !@journey.journey_complete?  ? deduct(PENALTY_FARE) : deduct(MINIMUM_BALANCE)
+      !@journey.journey_complete?  ? deduct(MINIMUM_BALANCE) : deduct(PENALTY_FARE)
       @journey.end_journey(exit_station)
+      @list_of_journeys << @journey.current_journey
     end
 
     def in_journey?
@@ -34,9 +34,8 @@ class Oystercard
     end
 
     def view_past_journeys
-      @list_of_journeys << @journey.current_journey
       @list_of_journeys.each do |index|
-       print "#{index["entry station"]} to #{index["exit station"]}"
+       print "#{index["entry station"]} to #{index["exit station"]} \n"
       end
     end
 
